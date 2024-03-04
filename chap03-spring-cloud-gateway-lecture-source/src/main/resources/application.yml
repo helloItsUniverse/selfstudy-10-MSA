@@ -1,0 +1,42 @@
+server:
+  port: 8000
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+spring:
+  application:
+    name: gateway-server
+  cloud:
+    gateway:
+
+      routes:
+        - id: my-1st-service
+#          uri: http://localhost:58109/
+
+          # 로드밸런싱(마이크로서비스의 이름으로 라우팅을 도와줌)으로 변경, 라우팅할 주소(uri)
+          uri: lb://MY-1ST-SERVICE
+
+          # 일종의 조건문으로써 요청 경로가 'first-service/** 로 들어오면~' 으로 해석
+          predicates:
+            - Path=/first-service/**
+
+          # Global, Custom 등의 필터를 추가하는 부분
+          #(request 및 response header 에 값 추가, segment 를 제외한 경로 제거)
+          filters:
+            - AddRequestHeader=first-request, first-request-header  # 전처리
+            - AddResponseHeader=first-response, first-response-header  # 후처리
+            - RewritePath=/first-service/(?<segment>.*), /$\{segment}
+        - id: my-2nd-service
+#          uri: http://localhost:58122/
+          uri: lb://MY-2ND-SERVICE
+          predicates:
+            - Path=/second-service/**
+          filters:
+            - AddRequestHeader=second-request, second-request-header
+            - AddResponseHeader=second-response, second-response-header
+            - RewritePath=/second-service/(?<segment>.*), /$\{segment}
