@@ -1,0 +1,13 @@
+server:
+  port: 7771
+
+spring:
+  application:
+    name: my-1st-service
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://192.168.56.1:8761/eureka
